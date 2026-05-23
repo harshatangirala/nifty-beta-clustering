@@ -2,6 +2,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import os
+import datetime
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -24,9 +25,10 @@ st.set_page_config(
 )
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-START = "2023-01-01"
-END   = "2026-04-01"
-NIFTY = "^NSEI"
+NIFTY         = "^NSEI"
+_DEFAULT_FROM = datetime.date(2023, 1, 1)
+_DEFAULT_TO   = datetime.date(2026, 4, 1)
+_MIN_FROM     = datetime.date(2010, 1, 1)   # earliest allowed start
 
 _CLUSTER_COLORS = {
     "Negative Beta": "#EF4444",
@@ -50,10 +52,10 @@ def load_universe() -> pd.DataFrame:
     return df
 
 
-# ttl=86400 → re-download once per day on Streamlit Cloud; cache is shared
-# across all concurrent users so only the first visitor pays the ~60 s cost.
+# ttl=86400 → re-download once per day on Streamlit Cloud; cache is keyed on
+# (syms, start, end) so each unique date range gets its own cached result.
 @st.cache_data(show_spinner=False, ttl=86400)
-def build_metrics(syms: tuple) -> pd.DataFrame:
+def build_metrics(syms: tuple, start: str, end: str) -> pd.DataFrame:
     """
     Download adjusted close prices for all NSE symbols + Nifty 50,
     then compute Beta, Alpha, Volatility, Correlation and R² for each stock
@@ -63,8 +65,8 @@ def build_metrics(syms: tuple) -> pd.DataFrame:
 
     raw = yf.download(
         tickers,
-        start=START,
-        end=END,
+        start=start,
+        end=end,
         auto_adjust=True,
         progress=False,
         threads=True,
@@ -256,18 +258,38 @@ def render_beta_box(df: pd.DataFrame) -> go.Figure:
 
 def main():
     st.title("📊 Nifty Stock Beta Clustering Dashboard")
-    st.caption(
-        "**333 NSE stocks** · "
-        "**Period: 1 Jan 2023 – 1 Apr 2026** · "
-        "**Benchmark: Nifty 50 (^NSEI)** · "
-        "Beta computed via OLS regression of daily returns"
-    )
 
     univ = load_universe()
     syms = tuple(univ["NSE_Symbol"].tolist())
+    today = datetime.date.today()
 
     # ── Sidebar ───────────────────────────────────────────────────────────────
     with st.sidebar:
+        st.header("📅 Date Range")
+        date_from = st.date_input(
+            "From",
+            value=_DEFAULT_FROM,
+            min_value=_MIN_FROM,
+            max_value=today - datetime.timedelta(days=180),
+            format="DD/MM/YYYY",
+        )
+        date_to = st.date_input(
+            "To",
+            value=min(_DEFAULT_TO, today),
+            min_value=date_from + datetime.timedelta(days=180),
+            max_value=today,
+            format="DD/MM/YYYY",
+        )
+
+        # Guard: ensure valid range before proceeding
+        if date_to <= date_from:
+            st.error("'To' date must be after 'From' date.")
+            st.stop()
+
+        start_str = date_from.strftime("%Y-%m-%d")
+        end_str   = date_to.strftime("%Y-%m-%d")
+
+        st.divider()
         st.header("⚙️ Clustering")
         n_cl = st.slider("Number of clusters", 2, 5, 3)
 
@@ -288,13 +310,21 @@ def main():
         st.caption(
             "Data: Yahoo Finance via yfinance.  \n"
             "First load downloads ~334 tickers — allow ~60–90 s.  \n"
-            "Results are cached; subsequent runs are instant."
+            "Results are cached per date range; subsequent runs are instant."
         )
+
+    # Dynamic caption — placed here so date_from/date_to are already defined
+    st.caption(
+        f"**333 NSE stocks** · "
+        f"**Period: {date_from.strftime('%d %b %Y')} – {date_to.strftime('%d %b %Y')}** · "
+        f"**Benchmark: Nifty 50 (^NSEI)** · "
+        f"Beta computed via OLS regression of daily returns"
+    )
 
     # ── Data pipeline ─────────────────────────────────────────────────────────
     with st.status("Loading data…", expanded=True) as sts:
         st.write("⏳ Downloading prices from Yahoo Finance…")
-        metrics_raw = build_metrics(syms)
+        metrics_raw = build_metrics(syms, start_str, end_str)
 
         if metrics_raw.empty:
             st.error(

@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from datetime import date, timedelta
 
 from config import (
-    NEWS_API_KEY, CONTINENTS, SENTIMENT_COLORS, SENTIMENT_EMOJIS,
+    NEWS_API_KEY, HF_TOKEN, CONTINENTS, SENTIMENT_COLORS, SENTIMENT_EMOJIS,
     DB_PATH, CACHE_EXPIRY_HOURS, MAX_ARTICLES_PER_QUERY,
 )
 
@@ -39,7 +39,7 @@ def get_db():
 @st.cache_resource
 def get_analyzer():
     from src.sentiment_analyzer import SentimentAnalyzer
-    return SentimentAnalyzer()
+    return SentimentAnalyzer(hf_token=HF_TOKEN)
 
 @st.cache_resource
 def get_mapper():
@@ -87,23 +87,24 @@ def fetch_and_analyse(continent_name, country_name, from_d, to_d, max_n):
     db       = get_db()
 
     if country_name and country_name != "All Countries":
-        ccfg     = cont_cfg["countries"][country_name]
-        articles = fetcher.fetch_for_country(
+        ccfg                = cont_cfg["countries"][country_name]
+        articles, errors    = fetcher.fetch_for_country(
             country_name, ccfg, continent_name,
-            from_date=from_d, to_date=to_d,
-            max_per_query=max_n,
+            from_date=from_d, to_date=to_d, max_per_query=max_n,
         )
     else:
-        articles = fetcher.fetch_for_continent(
+        articles, errors = fetcher.fetch_for_continent(
             continent_name, cont_cfg,
-            from_date=from_d, to_date=to_d,
-            max_per_query=max_n,
+            from_date=from_d, to_date=to_d, max_per_query=max_n,
         )
+
+    if errors:
+        st.error("**NewsAPI error:** " + " | ".join(errors[:3]))
 
     if not articles:
         return 0
 
-    texts     = [f"{a['title']} {a['description']}" for a in articles]
+    texts     = [f"{a['title']} {a.get('description','')}" for a in articles]
     model_key = "finbert" if (use_finbert and analyzer.finbert_available()) else "vader"
 
     with st.spinner(f"Running {model_key.upper()} on {len(articles)} articles…"):
@@ -118,7 +119,7 @@ def fetch_and_analyse(continent_name, country_name, from_d, to_d, max_n):
         art_id = db.upsert_article(art)
         if art_id:
             db.upsert_sentiment(art_id, model_key, sent)
-            related = mapper.find_related_stocks(art["title"], art["description"])
+            related = mapper.find_related_stocks(art["title"], art.get("description",""))
             if related:
                 db.upsert_stock_mentions(art_id, related)
 

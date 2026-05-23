@@ -34,10 +34,11 @@ st.markdown("""
 
 # ── Resources ─────────────────────────────────────────────────────────────────
 
-@st.cache_resource(show_spinner="Loading sentiment engine…")
+@st.cache_resource(show_spinner=False)
 def get_analyzer():
     from src.sentiment_analyzer import SentimentAnalyzer
-    return SentimentAnalyzer()
+    from config import HF_TOKEN
+    return SentimentAnalyzer(hf_token=HF_TOKEN)
 
 # ── Header ─────────────────────────────────────────────────────────────────────
 
@@ -65,8 +66,8 @@ with col_fb:
   <b>Task:</b> 3-class text classification (positive / negative / neutral)<br>
   <b>Input:</b> Max 512 tokens, truncated<br>
   <b>Output:</b> Softmax probabilities per class<br>
-  <b>Strength:</b> Financial domain expertise, contextual embeddings<br>
-  <b>Speed:</b> ~50 articles/min on CPU, ~500+/min on GPU
+  <b>Inference:</b> HuggingFace Inference API (no local GPU/download needed)<br>
+  <b>Strength:</b> Financial domain expertise, contextual BERT embeddings
 </div>
 """, unsafe_allow_html=True)
 

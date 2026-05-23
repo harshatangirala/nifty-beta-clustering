@@ -16,6 +16,17 @@ def _load_api_key() -> str:
 
 NEWS_API_KEY = _load_api_key()
 
+def _load_hf_token() -> str:
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and "HF_TOKEN" in st.secrets:
+            return st.secrets["HF_TOKEN"]
+    except Exception:
+        pass
+    return os.environ.get("HF_TOKEN", "")
+
+HF_TOKEN = _load_hf_token()
+
 # ── Model ────────────────────────────────────────────────────────────────────
 FINBERT_MODEL_NAME = "ProsusAI/finbert"
 SENTIMENT_LABELS = ["positive", "negative", "neutral"]

@@ -14,8 +14,11 @@ venv/
 .venv/
 env/
 
-# Streamlit cache
-.streamlit/
+# Streamlit — track config but never commit real secrets
+**/secrets.toml
+
+# SQLite databases
+*.db
 
 # OS
 .DS_Store

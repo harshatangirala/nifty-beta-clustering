@@ -1,0 +1,130 @@
+"""Top S&P 500 companies for stock mapping."""
+
+SP500_STOCKS = [
+    # Technology
+    {"symbol": "AAPL",  "company": "Apple Inc.",                  "industry": "Information Technology", "keywords": ["Apple", "iPhone", "iPad", "Mac", "iOS", "App Store", "Tim Cook"]},
+    {"symbol": "MSFT",  "company": "Microsoft Corporation",        "industry": "Information Technology", "keywords": ["Microsoft", "Windows", "Azure", "Office", "Teams", "Xbox", "Satya Nadella", "LinkedIn"]},
+    {"symbol": "NVDA",  "company": "NVIDIA Corporation",           "industry": "Information Technology", "keywords": ["NVIDIA", "GeForce", "CUDA", "GPU", "Jensen Huang", "AI chips", "H100", "Blackwell"]},
+    {"symbol": "GOOGL", "company": "Alphabet Inc.",                "industry": "Communication Services", "keywords": ["Alphabet", "Google", "YouTube", "Android", "Gmail", "Chrome", "DeepMind", "Sundar Pichai"]},
+    {"symbol": "AMZN",  "company": "Amazon.com Inc.",              "industry": "Consumer Discretionary", "keywords": ["Amazon", "AWS", "Prime", "Bezos", "Andy Jassy", "Alexa", "Kindle"]},
+    {"symbol": "META",  "company": "Meta Platforms Inc.",          "industry": "Communication Services", "keywords": ["Meta", "Facebook", "Instagram", "WhatsApp", "Zuckerberg", "Threads", "metaverse"]},
+    {"symbol": "TSLA",  "company": "Tesla Inc.",                   "industry": "Consumer Discretionary", "keywords": ["Tesla", "Elon Musk", "electric vehicle", "Cybertruck", "Supercharger", "Autopilot", "Giga"]},
+    {"symbol": "AVGO",  "company": "Broadcom Inc.",                "industry": "Information Technology", "keywords": ["Broadcom", "VMware", "semiconductor", "Hock Tan"]},
+    {"symbol": "ORCL",  "company": "Oracle Corporation",           "industry": "Information Technology", "keywords": ["Oracle", "database", "cloud", "Java", "Larry Ellison", "ERP"]},
+    {"symbol": "INTC",  "company": "Intel Corporation",            "industry": "Information Technology", "keywords": ["Intel", "processor", "chip", "semiconductor", "foundry", "Pat Gelsinger"]},
+    {"symbol": "AMD",   "company": "Advanced Micro Devices",       "industry": "Information Technology", "keywords": ["AMD", "Ryzen", "EPYC", "Radeon", "Lisa Su", "MI300"]},
+    {"symbol": "CRM",   "company": "Salesforce Inc.",              "industry": "Information Technology", "keywords": ["Salesforce", "CRM", "Slack", "Marc Benioff", "MuleSoft"]},
+    {"symbol": "NOW",   "company": "ServiceNow Inc.",              "industry": "Information Technology", "keywords": ["ServiceNow", "workflow", "enterprise software"]},
+    {"symbol": "QCOM",  "company": "Qualcomm Incorporated",        "industry": "Information Technology", "keywords": ["Qualcomm", "Snapdragon", "5G chip", "semiconductor", "modem"]},
+    {"symbol": "AMAT",  "company": "Applied Materials Inc.",       "industry": "Information Technology", "keywords": ["Applied Materials", "semiconductor equipment", "wafer"]},
+    {"symbol": "LRCX",  "company": "Lam Research Corporation",     "industry": "Information Technology", "keywords": ["Lam Research", "semiconductor equipment", "etch"]},
+    {"symbol": "MU",    "company": "Micron Technology Inc.",       "industry": "Information Technology", "keywords": ["Micron", "DRAM", "NAND", "memory chip", "HBM"]},
+    {"symbol": "ADI",   "company": "Analog Devices Inc.",          "industry": "Information Technology", "keywords": ["Analog Devices", "ADI", "semiconductor", "mixed signal"]},
+    {"symbol": "KLAC",  "company": "KLA Corporation",              "industry": "Information Technology", "keywords": ["KLA", "semiconductor inspection", "wafer"]},
+    {"symbol": "PANW",  "company": "Palo Alto Networks",           "industry": "Information Technology", "keywords": ["Palo Alto Networks", "cybersecurity", "firewall", "SASE"]},
+    # Financial Services
+    {"symbol": "BRK.B", "company": "Berkshire Hathaway Inc.",      "industry": "Financial Services",    "keywords": ["Berkshire Hathaway", "Warren Buffett", "Berkshire", "Charlie Munger"]},
+    {"symbol": "JPM",   "company": "JPMorgan Chase & Co.",         "industry": "Financial Services",    "keywords": ["JPMorgan", "JP Morgan", "Chase", "Jamie Dimon", "investment bank"]},
+    {"symbol": "BAC",   "company": "Bank of America Corporation",  "industry": "Financial Services",    "keywords": ["Bank of America", "BofA", "Brian Moynihan", "Merrill Lynch"]},
+    {"symbol": "WFC",   "company": "Wells Fargo & Company",        "industry": "Financial Services",    "keywords": ["Wells Fargo", "Charlie Scharf", "mortgage"]},
+    {"symbol": "GS",    "company": "The Goldman Sachs Group Inc.", "industry": "Financial Services",    "keywords": ["Goldman Sachs", "David Solomon", "investment banking"]},
+    {"symbol": "MS",    "company": "Morgan Stanley",               "industry": "Financial Services",    "keywords": ["Morgan Stanley", "James Gorman", "Ted Pick", "wealth management"]},
+    {"symbol": "C",     "company": "Citigroup Inc.",               "industry": "Financial Services",    "keywords": ["Citigroup", "Citi", "Jane Fraser", "consumer banking"]},
+    {"symbol": "AXP",   "company": "American Express Company",     "industry": "Financial Services",    "keywords": ["American Express", "Amex", "Stephen Squeri", "credit card"]},
+    {"symbol": "SPGI",  "company": "S&P Global Inc.",              "industry": "Financial Services",    "keywords": ["S&P Global", "credit rating", "Moody's competitor", "index"]},
+    {"symbol": "MCO",   "company": "Moody's Corporation",          "industry": "Financial Services",    "keywords": ["Moody's", "credit rating", "Rob Fauber"]},
+    {"symbol": "V",     "company": "Visa Inc.",                    "industry": "Financial Services",    "keywords": ["Visa", "payment network", "Ryan McInerney", "credit card"]},
+    {"symbol": "MA",    "company": "Mastercard Incorporated",      "industry": "Financial Services",    "keywords": ["Mastercard", "payment network", "Michael Miebach"]},
+    {"symbol": "PYPL",  "company": "PayPal Holdings Inc.",         "industry": "Financial Services",    "keywords": ["PayPal", "Venmo", "Alex Chriss", "digital payment"]},
+    {"symbol": "BLK",   "company": "BlackRock Inc.",               "industry": "Financial Services",    "keywords": ["BlackRock", "Larry Fink", "iShares", "ETF", "asset management"]},
+    # Healthcare
+    {"symbol": "UNH",   "company": "UnitedHealth Group",           "industry": "Healthcare",            "keywords": ["UnitedHealth", "Optum", "health insurance", "Brian Thompson"]},
+    {"symbol": "JNJ",   "company": "Johnson & Johnson",            "industry": "Healthcare",            "keywords": ["Johnson & Johnson", "J&J", "pharmaceutical", "MedTech", "Joaquin Duato"]},
+    {"symbol": "LLY",   "company": "Eli Lilly and Company",        "industry": "Healthcare",            "keywords": ["Eli Lilly", "Lilly", "Mounjaro", "Zepbound", "tirzepatide", "obesity drug", "GLP-1", "David Ricks"]},
+    {"symbol": "PFE",   "company": "Pfizer Inc.",                  "industry": "Healthcare",            "keywords": ["Pfizer", "vaccine", "Paxlovid", "Albert Bourla", "pharmaceutical"]},
+    {"symbol": "ABBV",  "company": "AbbVie Inc.",                  "industry": "Healthcare",            "keywords": ["AbbVie", "Humira", "Skyrizi", "Richard Gonzalez", "pharmaceutical"]},
+    {"symbol": "MRK",   "company": "Merck & Co. Inc.",             "industry": "Healthcare",            "keywords": ["Merck", "Keytruda", "Robert Davis", "pharmaceutical"]},
+    {"symbol": "BMY",   "company": "Bristol-Myers Squibb",         "industry": "Healthcare",            "keywords": ["Bristol-Myers Squibb", "BMS", "Opdivo", "Christopher Boerner"]},
+    {"symbol": "AMGN",  "company": "Amgen Inc.",                   "industry": "Healthcare",            "keywords": ["Amgen", "biotech", "Robert Bradway", "Repatha"]},
+    {"symbol": "GILD",  "company": "Gilead Sciences Inc.",         "industry": "Healthcare",            "keywords": ["Gilead", "antiviral", "Daniel O'Day", "HIV drug", "Biktarvy"]},
+    {"symbol": "CVS",   "company": "CVS Health Corporation",       "industry": "Healthcare",            "keywords": ["CVS Health", "CVS pharmacy", "Aetna", "David Joyner"]},
+    {"symbol": "TMO",   "company": "Thermo Fisher Scientific",     "industry": "Healthcare",            "keywords": ["Thermo Fisher", "life science", "Marc Casper", "laboratory"]},
+    # Energy
+    {"symbol": "XOM",   "company": "Exxon Mobil Corporation",      "industry": "Energy",                "keywords": ["ExxonMobil", "Exxon Mobil", "Darren Woods", "oil", "natural gas", "Pioneer"]},
+    {"symbol": "CVX",   "company": "Chevron Corporation",          "industry": "Energy",                "keywords": ["Chevron", "Mike Wirth", "oil", "natural gas", "LNG"]},
+    {"symbol": "COP",   "company": "ConocoPhillips",               "industry": "Energy",                "keywords": ["ConocoPhillips", "Ryan Lance", "oil production", "shale"]},
+    {"symbol": "SLB",   "company": "Schlumberger (SLB)",           "industry": "Energy",                "keywords": ["Schlumberger", "SLB", "oilfield services", "Olivier Le Peuch"]},
+    {"symbol": "OXY",   "company": "Occidental Petroleum",         "industry": "Energy",                "keywords": ["Occidental Petroleum", "Oxy", "Vicki Hollub", "Buffett", "oil"]},
+    {"symbol": "NEE",   "company": "NextEra Energy Inc.",          "industry": "Utilities",             "keywords": ["NextEra Energy", "FPL", "renewable energy", "John Ketchum", "solar wind"]},
+    # Consumer
+    {"symbol": "AMZN",  "company": "Amazon.com Inc.",              "industry": "Consumer Discretionary", "keywords": ["Amazon", "e-commerce", "Prime", "AWS"]},
+    {"symbol": "WMT",   "company": "Walmart Inc.",                 "industry": "Consumer Staples",      "keywords": ["Walmart", "Doug McMillon", "retail", "Sam's Club", "grocery"]},
+    {"symbol": "COST",  "company": "Costco Wholesale Corporation", "industry": "Consumer Staples",      "keywords": ["Costco", "Ron Vachris", "membership", "warehouse club"]},
+    {"symbol": "PG",    "company": "Procter & Gamble Company",     "industry": "Consumer Staples",      "keywords": ["Procter & Gamble", "P&G", "Jon Moeller", "Tide", "Pampers", "Gillette"]},
+    {"symbol": "KO",    "company": "The Coca-Cola Company",        "industry": "Consumer Staples",      "keywords": ["Coca-Cola", "Coke", "James Quincey", "beverage"]},
+    {"symbol": "PEP",   "company": "PepsiCo Inc.",                 "industry": "Consumer Staples",      "keywords": ["PepsiCo", "Pepsi", "Ramon Laguarta", "Frito-Lay", "Gatorade"]},
+    {"symbol": "MCD",   "company": "McDonald's Corporation",       "industry": "Consumer Discretionary", "keywords": ["McDonald's", "McDonalds", "Chris Kempczinski", "fast food", "Big Mac"]},
+    {"symbol": "NKE",   "company": "NIKE Inc.",                    "industry": "Consumer Discretionary", "keywords": ["Nike", "Jordan", "Elliott Hill", "athletic", "sneaker"]},
+    {"symbol": "HD",    "company": "The Home Depot Inc.",          "industry": "Consumer Discretionary", "keywords": ["Home Depot", "Ted Decker", "home improvement", "hardware"]},
+    {"symbol": "LOW",   "company": "Lowe's Companies Inc.",        "industry": "Consumer Discretionary", "keywords": ["Lowe's", "Marvin Ellison", "home improvement"]},
+    {"symbol": "SBUX",  "company": "Starbucks Corporation",        "industry": "Consumer Discretionary", "keywords": ["Starbucks", "Brian Niccol", "coffee", "latte"]},
+    {"symbol": "TGT",   "company": "Target Corporation",           "industry": "Consumer Staples",      "keywords": ["Target", "Brian Cornell", "retail", "store"]},
+    {"symbol": "PM",    "company": "Philip Morris International",  "industry": "Consumer Staples",      "keywords": ["Philip Morris", "IQOS", "Jacek Olczak", "tobacco", "cigarette"]},
+    # Industrial
+    {"symbol": "CAT",   "company": "Caterpillar Inc.",             "industry": "Industrials",           "keywords": ["Caterpillar", "Jim Umpleby", "construction equipment", "mining equipment"]},
+    {"symbol": "BA",    "company": "The Boeing Company",           "industry": "Industrials",           "keywords": ["Boeing", "Kelly Ortberg", "aircraft", "737 MAX", "aerospace", "defense"]},
+    {"symbol": "RTX",   "company": "RTX Corporation",              "industry": "Industrials",           "keywords": ["RTX", "Raytheon", "Pratt & Whitney", "Collins Aerospace", "defense"]},
+    {"symbol": "GE",    "company": "GE Aerospace",                 "industry": "Industrials",           "keywords": ["GE Aerospace", "General Electric", "Larry Culp", "jet engine"]},
+    {"symbol": "UPS",   "company": "United Parcel Service",        "industry": "Industrials",           "keywords": ["UPS", "Carol Tome", "parcel delivery", "logistics", "shipping"]},
+    {"symbol": "HON",   "company": "Honeywell International",      "industry": "Industrials",           "keywords": ["Honeywell", "Vimal Kapur", "aerospace", "automation"]},
+    {"symbol": "LMT",   "company": "Lockheed Martin Corporation",  "industry": "Industrials",           "keywords": ["Lockheed Martin", "Jim Taiclet", "F-35", "defense", "missile"]},
+    {"symbol": "NOC",   "company": "Northrop Grumman Corporation", "industry": "Industrials",           "keywords": ["Northrop Grumman", "Kathy Warden", "B-21", "defense", "space"]},
+    {"symbol": "DE",    "company": "Deere & Company",              "industry": "Industrials",           "keywords": ["Deere", "John Deere", "tractor", "farming equipment", "agriculture"]},
+    {"symbol": "GD",    "company": "General Dynamics Corporation", "industry": "Industrials",           "keywords": ["General Dynamics", "Phebe Novakovic", "Gulfstream", "defense"]},
+    # Communication
+    {"symbol": "NFLX",  "company": "Netflix Inc.",                 "industry": "Communication Services", "keywords": ["Netflix", "Greg Peters", "streaming", "content", "subscriber"]},
+    {"symbol": "DIS",   "company": "The Walt Disney Company",      "industry": "Communication Services", "keywords": ["Disney", "Bob Iger", "Disney+", "Marvel", "Star Wars", "theme park"]},
+    {"symbol": "CMCSA", "company": "Comcast Corporation",          "industry": "Communication Services", "keywords": ["Comcast", "Brian Roberts", "NBC", "Universal", "cable"]},
+    {"symbol": "VZ",    "company": "Verizon Communications Inc.",  "industry": "Communication Services", "keywords": ["Verizon", "Hans Vestberg", "5G", "telecom", "wireless"]},
+    {"symbol": "T",     "company": "AT&T Inc.",                    "industry": "Communication Services", "keywords": ["AT&T", "John Stankey", "telecom", "wireless", "DirecTV"]},
+    {"symbol": "SPOT",  "company": "Spotify Technology SA",        "industry": "Communication Services", "keywords": ["Spotify", "Daniel Ek", "music streaming", "podcast"]},
+    # Real Estate
+    {"symbol": "AMT",   "company": "American Tower Corporation",   "industry": "Real Estate",           "keywords": ["American Tower", "cell tower", "REIT", "Tom Bartlett"]},
+    {"symbol": "PLD",   "company": "Prologis Inc.",                "industry": "Real Estate",           "keywords": ["Prologis", "logistics real estate", "REIT", "Hamid Moghadam"]},
+    {"symbol": "EQIX",  "company": "Equinix Inc.",                 "industry": "Real Estate",           "keywords": ["Equinix", "data center", "REIT", "Charles Meyers"]},
+    # Materials
+    {"symbol": "LIN",   "company": "Linde plc",                    "industry": "Materials",             "keywords": ["Linde", "industrial gas", "Sanjiv Lamba", "hydrogen"]},
+    {"symbol": "APD",   "company": "Air Products and Chemicals",   "industry": "Materials",             "keywords": ["Air Products", "industrial gas", "hydrogen", "Seifi Ghasemi"]},
+    {"symbol": "NEM",   "company": "Newmont Corporation",          "industry": "Materials",             "keywords": ["Newmont", "gold mining", "Tom Palmer", "precious metals"]},
+    {"symbol": "FCX",   "company": "Freeport-McMoRan Inc.",        "industry": "Materials",             "keywords": ["Freeport-McMoRan", "Freeport", "copper mining", "Richard Adkerson"]},
+    # Additional tech
+    {"symbol": "UBER",  "company": "Uber Technologies Inc.",       "industry": "Information Technology", "keywords": ["Uber", "Dara Khosrowshahi", "ride-hailing", "Uber Eats", "delivery"]},
+    {"symbol": "ABNB",  "company": "Airbnb Inc.",                  "industry": "Consumer Discretionary", "keywords": ["Airbnb", "Brian Chesky", "vacation rental", "travel"]},
+    {"symbol": "SNOW",  "company": "Snowflake Inc.",               "industry": "Information Technology", "keywords": ["Snowflake", "data cloud", "Sridhar Ramaswamy", "cloud data"]},
+    {"symbol": "COIN",  "company": "Coinbase Global Inc.",         "industry": "Financial Services",    "keywords": ["Coinbase", "Brian Armstrong", "crypto exchange", "Bitcoin exchange"]},
+    {"symbol": "SQ",    "company": "Block Inc.",                   "company_alt": "Square",            "industry": "Financial Services",    "keywords": ["Block", "Square", "Jack Dorsey", "CashApp", "payment"]},
+    {"symbol": "SHOP",  "company": "Shopify Inc.",                 "industry": "Information Technology", "keywords": ["Shopify", "Tobias Lutke", "e-commerce", "merchant"]},
+    {"symbol": "ARM",   "company": "Arm Holdings plc",            "industry": "Information Technology", "keywords": ["Arm", "ARM Holdings", "semiconductor", "Rene Haas", "chip architecture"]},
+    {"symbol": "TSM",   "company": "Taiwan Semiconductor (TSMC)", "industry": "Information Technology", "keywords": ["TSMC", "Taiwan Semiconductor", "C.C. Wei", "foundry", "chip manufacturing"]},
+    {"symbol": "ASML",  "company": "ASML Holding NV",             "industry": "Information Technology", "keywords": ["ASML", "EUV", "lithography", "semiconductor equipment", "Christophe Fouquet"]},
+    {"symbol": "SAP",   "company": "SAP SE",                      "industry": "Information Technology", "keywords": ["SAP", "enterprise software", "Christian Klein", "ERP", "HANA"]},
+    {"symbol": "BABA",  "company": "Alibaba Group Holding",       "industry": "Consumer Discretionary", "keywords": ["Alibaba", "Alipay", "Taobao", "Tmall", "Eddie Wu", "cloud China"]},
+    {"symbol": "PDD",   "company": "PDD Holdings Inc.",           "industry": "Consumer Discretionary", "keywords": ["PDD", "Pinduoduo", "Temu", "e-commerce China"]},
+    {"symbol": "JD",    "company": "JD.com Inc.",                 "industry": "Consumer Discretionary", "keywords": ["JD.com", "JD", "Sandy Xu", "China e-commerce", "logistics"]},
+]
+
+def get_sp500_df() -> "pd.DataFrame":
+    import pandas as pd
+    rows = []
+    seen = set()
+    for s in SP500_STOCKS:
+        if s["symbol"] not in seen:
+            seen.add(s["symbol"])
+            rows.append({
+                "Symbol":       s["symbol"],
+                "Company Name": s["company"],
+                "Industry":     s["industry"],
+                "Market":       "S&P 500",
+                "keywords":     s.get("keywords", [s["company"]]),
+            })
+    return pd.DataFrame(rows)

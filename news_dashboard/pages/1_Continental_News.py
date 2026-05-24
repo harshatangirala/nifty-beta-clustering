@@ -286,7 +286,8 @@ if len(df) > 0:
     cols = st.columns(2)
     shown = df.dropna(subset=["title"]).head(n_articles)
     for i, (_, row) in enumerate(shown.iterrows()):
-        sentiment = row.get("sentiment_label", "neutral") or "neutral"
+        _sl = row.get("sentiment_label")
+        sentiment = _sl if isinstance(_sl, str) and _sl in ("positive","negative","neutral") else "neutral"
         badge_cls = f"badge-{sentiment}"
         emoji     = SENTIMENT_EMOJIS.get(sentiment, "➡️")
         title     = row.get("title", "")[:140]

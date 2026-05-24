@@ -348,8 +348,11 @@ st.markdown("### 📰 Latest Headlines")
 
 recent = df.dropna(subset=["title"]).head(30)
 cols   = st.columns(3)
+def _safe_label(val) -> str:
+    return val if isinstance(val, str) and val in ("positive", "negative", "neutral") else "neutral"
+
 for i, (_, row) in enumerate(recent.iterrows()):
-    sentiment = (row.get("sentiment_label") or "neutral")
+    sentiment = _safe_label(row.get("sentiment_label"))
     badge_cls = f"badge-{sentiment}"
     emoji     = SENTIMENT_EMOJIS.get(sentiment, "➡️")
     title     = (row.get("title") or "")[:120]

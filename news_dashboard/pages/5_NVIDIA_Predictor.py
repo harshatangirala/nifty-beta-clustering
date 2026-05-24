@@ -212,7 +212,8 @@ def fetch_price_data(end_date_str: str) -> pd.DataFrame:
             df.columns = [str(c).lower() for c in df.columns]
         if "date" not in df.columns:
             df = df.rename(columns={df.columns[0]: "date"})
-        df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None).dt.normalize()
+        _dt = pd.to_datetime(df["date"])
+        df["date"] = (_dt.dt.tz_convert(None) if _dt.dt.tz is not None else _dt).dt.normalize()
         for col in ["open", "high", "low", "close", "volume"]:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -264,7 +265,7 @@ def fetch_nvidia_news(api_key: str, lookback_days: int, max_per_q: int) -> pd.Da
         return pd.DataFrame()
     df = pd.DataFrame(articles)
     df["published_at"] = pd.to_datetime(df["published_at"], errors="coerce", utc=True)
-    df["date"] = df["published_at"].dt.tz_localize(None).dt.normalize()
+    df["date"] = df["published_at"].dt.tz_convert(None).dt.normalize()
     return df.dropna(subset=["date", "title"]).sort_values("date").reset_index(drop=True)
 
 

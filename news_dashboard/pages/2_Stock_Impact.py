@@ -443,8 +443,8 @@ def render_market(df_met: pd.DataFrame, df_raw: pd.DataFrame,
             "Negative %":      "{:.1f}%",
             "Neutral %":       "{:.1f}%",
         })
-        .applymap(colour_rating,   subset=["Rating"])
-        .applymap(colour_compound, subset=["Sentiment Score","Weighted Impact","Momentum"])
+        .map(colour_rating,   subset=["Rating"])
+        .map(colour_compound, subset=["Sentiment Score","Weighted Impact","Momentum"])
     )
     st.dataframe(styled, use_container_width=True, height=420)
 

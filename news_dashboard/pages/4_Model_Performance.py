@@ -466,7 +466,7 @@ if fb.get("true_labels") and fb.get("pred_labels"):
         correct_df = sample_rows(fb["true_labels"], fb["pred_labels"], sample_texts, True)
         if not correct_df.empty:
             st.dataframe(
-                correct_df.style.applymap(
+                correct_df.style.map(
                     lambda v: f"color: {COLORS.get(v, '#E8EAED')}", subset=["True", "Predicted"]
                 ),
                 use_container_width=True, height=330,
@@ -476,7 +476,7 @@ if fb.get("true_labels") and fb.get("pred_labels"):
         wrong_df = sample_rows(fb["true_labels"], fb["pred_labels"], sample_texts, False)
         if not wrong_df.empty:
             st.dataframe(
-                wrong_df.style.applymap(
+                wrong_df.style.map(
                     lambda v: f"color: {COLORS.get(v, '#E8EAED')}", subset=["True", "Predicted"]
                 ),
                 use_container_width=True, height=330,

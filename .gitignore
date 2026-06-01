@@ -20,6 +20,10 @@ env/
 # SQLite databases
 *.db
 
+# DCF model — never commit cached API responses
+dcf_model/data/cache/*.json
+dcf_model/data/cache/*.parquet
+
 # OS
 .DS_Store
 Thumbs.db

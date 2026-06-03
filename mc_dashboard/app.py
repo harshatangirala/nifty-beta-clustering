@@ -199,9 +199,17 @@ with tab_sim:
         )
 
         # Vertical separator at last known date
-        fig.add_vline(
-            x=str(last_date)[:10], line_dash="dot", line_color="#888888", line_width=1,
-            annotation_text="Today", annotation_position="top right",
+        # add_vline with string dates breaks in Plotly 6.x — use add_shape instead
+        fig.add_shape(
+            type="line",
+            x0=str(last_date)[:10], x1=str(last_date)[:10],
+            y0=0, y1=1, yref="paper",
+            line=dict(dash="dot", color="#888888", width=1),
+        )
+        fig.add_annotation(
+            x=str(last_date)[:10], y=1, yref="paper",
+            text="Today", showarrow=False,
+            xanchor="right", font=dict(color="#888888", size=11),
         )
 
         # Fan bands — filled from outer to inner (each fill covers previous trace)

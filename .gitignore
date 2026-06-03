@@ -24,6 +24,9 @@ env/
 dcf_model/data/cache/*.json
 dcf_model/data/cache/*.parquet
 
+# Monte Carlo dashboard cache
+mc_dashboard/data/cache/*.json
+
 # OS
 .DS_Store
 Thumbs.db

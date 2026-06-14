@@ -27,6 +27,10 @@ dcf_model/data/cache/*.parquet
 # Monte Carlo dashboard cache
 mc_dashboard/data/cache/*.json
 
+# Study dashboard — never commit OAuth secrets
+study_dashboard/credentials.json
+study_dashboard/token.json
+
 # OS
 .DS_Store
 Thumbs.db

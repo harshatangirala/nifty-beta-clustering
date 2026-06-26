@@ -31,6 +31,10 @@ mc_dashboard/data/cache/*.json
 study_dashboard/credentials.json
 study_dashboard/token.json
 
+# Nifty seasonality dashboard — cached yfinance pull, regenerated on first run
+nifty_dow_analysis/data/*.csv
+nifty_dow_analysis/streamlit_run.log
+
 # OS
 .DS_Store
 Thumbs.db

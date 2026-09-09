@@ -27,21 +27,17 @@ st.set_page_config(
 # ── Constants ─────────────────────────────────────────────────────────────────
 NIFTY         = "^NSEI"
 _DEFAULT_FROM = datetime.date(2023, 1, 1)
-_DEFAULT_TO   = datetime.date(2026, 4, 1)
+# NOTE: default "To" is computed dynamically at runtime (see main()), never a
+# fixed calendar date — a hardcoded constant here would silently stop picking
+# up new data the moment that date passed (this bit prior dashboards on this
+# account, e.g. a fixed 2026-04-01 default is now ~5 months stale as of today).
 _MIN_FROM     = datetime.date(2010, 1, 1)   # earliest allowed start
 
-_CLUSTER_COLORS = {
-    "Negative Beta": "#EF4444",
-    "Neutral Beta":  "#F59E0B",
-    "Positive Beta": "#10B981",
-    "Low Beta":      "#60A5FA",
-    "High Beta":     "#10B981",
-    "Cluster 1":     "#EF4444",
-    "Cluster 2":     "#F59E0B",
-    "Cluster 3":     "#10B981",
-    "Cluster 4":     "#A78BFA",
-    "Cluster 5":     "#F97316",
-}
+# Colors are assigned by cluster RANK (lowest mean beta -> red ... highest ->
+# purple) at runtime in run_clustering(), not by a fixed name->color table.
+# A fixed table keyed on label text broke whenever the label vocabulary
+# changed or two clusters shared a label after dedup.
+_RANK_PALETTE = ["#EF4444", "#F59E0B", "#10B981", "#60A5FA", "#A78BFA"]
 
 # ── Data helpers ──────────────────────────────────────────────────────────────
 
@@ -62,17 +58,29 @@ def build_metrics(syms: tuple, start: str, end: str) -> pd.DataFrame:
     via OLS regression of daily returns against the Nifty 50.
     """
     tickers = list(syms) + [NIFTY]
+    empty = pd.DataFrame(columns=["Symbol","Beta","Alpha","Volatility","Correlation","R2","P_Value"])
 
-    raw = yf.download(
-        tickers,
-        start=start,
-        end=end,
-        auto_adjust=True,
-        progress=False,
-        threads=True,
-    )
+    try:
+        raw = yf.download(
+            tickers,
+            start=start,
+            end=end,
+            auto_adjust=True,
+            progress=False,
+            threads=True,
+        )
+    except Exception:
+        # No internet / Yahoo Finance outage / rate-limit — raised as a hard
+        # exception by yfinance rather than an empty frame. Route it through
+        # the same "empty" path so the caller's friendly error message (and
+        # st.stop()) fires instead of an unhandled traceback crashing the app.
+        return empty
 
-    # yfinance returns MultiIndex (field, ticker) for multiple tickers
+    if raw is None or raw.empty:
+        return empty
+
+    # yfinance returns MultiIndex (field, ticker) columns for multi-ticker
+    # downloads (this has changed across yfinance versions — handle both).
     if isinstance(raw.columns, pd.MultiIndex):
         close = raw["Close"]
     else:
@@ -80,7 +88,7 @@ def build_metrics(syms: tuple, start: str, end: str) -> pd.DataFrame:
 
     if NIFTY not in close.columns:
         # yfinance occasionally fails on cloud — caller shows a user-friendly error
-        return pd.DataFrame(columns=["Symbol","Beta","Alpha","Volatility","Correlation","R2","P_Value"])
+        return empty
 
     mkt = close[NIFTY].pct_change().dropna()
     rows = []
@@ -114,9 +122,36 @@ def build_metrics(syms: tuple, start: str, end: str) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# Beta buckets used to label a cluster from its ACTUAL mean beta, rather than
+# from its rank alone. A pure rank->name table (e.g. "lowest-beta cluster is
+# always called Negative Beta") mislabels data whenever the real distribution
+# doesn't span both signs — e.g. on the Nifty 500 universe, where almost every
+# stock has a positive beta, the lowest-beta cluster still had a positive mean
+# but was shown as "Negative Beta" (verified: a 15-stock test run produced a
+# "Negative Beta" cluster containing only stocks with beta 0.46-0.72).
+_BETA_BUCKETS = [
+    (-float("inf"), -0.05, "Negative Beta"),
+    (-0.05,          0.85, "Low Beta"),
+    (0.85,           1.15, "Market Beta"),
+    (1.15,   float("inf"), "High Beta"),
+]
+
+
+def _bucket_label(mean_beta: float) -> str:
+    for lo, hi, label in _BETA_BUCKETS:
+        if lo <= mean_beta < hi:
+            return label
+    return "High Beta"
+
+
 @st.cache_data(show_spinner=False)
-def run_clustering(metrics: pd.DataFrame, n: int, feats: tuple) -> pd.DataFrame:
-    """K-Means on scaled features; clusters ranked and named by mean Beta."""
+def run_clustering(metrics: pd.DataFrame, n: int, feats: tuple):
+    """K-Means on scaled features; clusters ranked and labeled by mean Beta.
+
+    Returns (dataframe_with_cluster_column, color_map) where color_map maps
+    each cluster label actually produced this run to a color, assigned by
+    rank (lowest mean beta -> red ... highest -> purple).
+    """
     feats = list(feats)
     X  = metrics[feats].values.astype(float)
     ok = np.all(np.isfinite(X), axis=1)
@@ -132,16 +167,22 @@ def run_clustering(metrics: pd.DataFrame, n: int, feats: tuple) -> pd.DataFrame:
     order = np.argsort(means)
     r_map = {int(c): rank for rank, c in enumerate(order)}
 
-    if n == 2:
-        names = ["Low Beta", "High Beta"]
-    elif n == 3:
-        names = ["Negative Beta", "Neutral Beta", "Positive Beta"]
-    else:
-        names = [f"Cluster {i + 1}" for i in range(n)]
+    # Label each rank from its actual mean beta, then disambiguate duplicates
+    # (e.g. two different clusters both landing in the "High Beta" bucket) so
+    # distinct KMeans clusters never silently collapse into one legend entry.
+    raw_names = [_bucket_label(means[c]) for c in order]
+    seen: dict = {}
+    names = []
+    for nm in raw_names:
+        seen[nm] = seen.get(nm, 0) + 1
+        names.append(nm if seen[nm] == 1 else f"{nm} ({seen[nm]})")
+
+    positions = np.linspace(0, len(_RANK_PALETTE) - 1, n).round().astype(int)
+    color_map = {name: _RANK_PALETTE[pos] for name, pos in zip(names, positions)}
 
     df = df.copy()
     df["Cluster"] = [names[r_map[int(l)]] for l in labels]
-    return df
+    return df, color_map
 
 
 # ── Layout helpers ────────────────────────────────────────────────────────────
@@ -150,7 +191,7 @@ def _vline(fig, x, dash, color):
     fig.add_vline(x=x, line_dash=dash, line_color=color, line_width=1)
 
 
-def render_scatter(df: pd.DataFrame) -> go.Figure:
+def render_scatter(df: pd.DataFrame, color_map: dict) -> go.Figure:
     fig = px.scatter(
         df,
         x="Beta",
@@ -166,7 +207,7 @@ def render_scatter(df: pd.DataFrame) -> go.Figure:
             "R2":           ":.3f",
             "Cluster":      False,
         },
-        color_discrete_map=_CLUSTER_COLORS,
+        color_discrete_map=color_map,
         labels={"Beta": "β  (vs Nifty 50)", "Volatility": "Ann. Volatility (%)"},
         title=f"Beta vs Volatility — {len(df)} stocks",
     )
@@ -182,11 +223,11 @@ def render_scatter(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def render_histogram(df: pd.DataFrame) -> go.Figure:
+def render_histogram(df: pd.DataFrame, color_map: dict) -> go.Figure:
     fig = px.histogram(
         df, x="Beta", color="Cluster",
         barmode="overlay", nbins=40, opacity=0.72,
-        color_discrete_map=_CLUSTER_COLORS,
+        color_discrete_map=color_map,
         labels={"Beta": "β"},
         title="Beta distribution",
     )
@@ -196,11 +237,11 @@ def render_histogram(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def render_pie(df: pd.DataFrame) -> go.Figure:
+def render_pie(df: pd.DataFrame, color_map: dict) -> go.Figure:
     pie = df.groupby("Cluster").size().reset_index(name="n")
     fig = px.pie(
         pie, values="n", names="Cluster",
-        color="Cluster", color_discrete_map=_CLUSTER_COLORS,
+        color="Cluster", color_discrete_map=color_map,
         hole=0.45, title="Cluster share",
     )
     fig.update_traces(textposition="inside", textinfo="percent+label")
@@ -209,11 +250,11 @@ def render_pie(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def render_industry_bar(df: pd.DataFrame) -> go.Figure:
+def render_industry_bar(df: pd.DataFrame, color_map: dict) -> go.Figure:
     d = df.groupby(["Industry", "Cluster"]).size().reset_index(name="n")
     fig = px.bar(
         d, x="Industry", y="n", color="Cluster",
-        color_discrete_map=_CLUSTER_COLORS, barmode="stack",
+        color_discrete_map=color_map, barmode="stack",
         labels={"n": "Stocks"},
         title="Stock count by Industry and Beta Cluster",
     )
@@ -241,10 +282,10 @@ def render_index_bar(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def render_beta_box(df: pd.DataFrame) -> go.Figure:
+def render_beta_box(df: pd.DataFrame, color_map: dict) -> go.Figure:
     fig = px.box(
         df, x="Cluster", y="Beta", color="Cluster",
-        color_discrete_map=_CLUSTER_COLORS,
+        color_discrete_map=color_map,
         points="outliers",
         title="Beta distribution per cluster (box plot)",
         labels={"Beta": "β"},
@@ -275,7 +316,8 @@ def main():
         )
         date_to = st.date_input(
             "To",
-            value=min(_DEFAULT_TO, today),
+            value=today,  # always defaults to the latest available date, not
+                          # a fixed calendar date that would go stale over time
             min_value=date_from + datetime.timedelta(days=180),
             max_value=today,
             format="DD/MM/YYYY",
@@ -313,9 +355,11 @@ def main():
             "Results are cached per date range; subsequent runs are instant."
         )
 
-    # Dynamic caption — placed here so date_from/date_to are already defined
+    # Dynamic caption — placed here so date_from/date_to are already defined.
+    # Stock count comes from len(syms) (the loaded universe), not a hardcoded
+    # number, so it can't drift out of sync if master_stock_universe.csv changes.
     st.caption(
-        f"**333 NSE stocks** · "
+        f"**{len(syms)} NSE stocks** · "
         f"**Period: {date_from.strftime('%d %b %Y')} – {date_to.strftime('%d %b %Y')}** · "
         f"**Benchmark: Nifty 50 (^NSEI)** · "
         f"Beta computed via OLS regression of daily returns"
@@ -343,7 +387,7 @@ def main():
         )
 
         st.write(f"🔄 Running K-Means (k={n_cl}, features: {', '.join(feats)})…")
-        clustered = run_clustering(metrics_raw, n_cl, feats)
+        clustered, color_map = run_clustering(metrics_raw, n_cl, feats)
         clustered = clustered.merge(
             univ[["Symbol", "Company Name", "Industry", "Index Name"]],
             on="Symbol", how="left",
@@ -394,21 +438,21 @@ def main():
 
     with col_main:
         st.subheader("Beta vs Volatility")
-        st.plotly_chart(render_scatter(view), use_container_width=True)
+        st.plotly_chart(render_scatter(view, color_map), use_container_width=True)
 
     with col_side:
         st.subheader("Cluster Share")
-        st.plotly_chart(render_pie(view), use_container_width=True)
+        st.plotly_chart(render_pie(view, color_map), use_container_width=True)
         st.subheader("Beta Distribution")
-        st.plotly_chart(render_histogram(view), use_container_width=True)
+        st.plotly_chart(render_histogram(view, color_map), use_container_width=True)
 
     # ── Box plot ──────────────────────────────────────────────────────────────
     st.subheader("Beta Box Plot by Cluster")
-    st.plotly_chart(render_beta_box(view), use_container_width=True)
+    st.plotly_chart(render_beta_box(view, color_map), use_container_width=True)
 
     # ── Industry stacked bar ──────────────────────────────────────────────────
     st.subheader("Industry × Cluster Breakdown")
-    st.plotly_chart(render_industry_bar(view), use_container_width=True)
+    st.plotly_chart(render_industry_bar(view, color_map), use_container_width=True)
 
     # ── Index avg beta ────────────────────────────────────────────────────────
     st.subheader("Average β by Index")

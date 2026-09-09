@@ -17,24 +17,6 @@ env/
 # Streamlit — track config but never commit real secrets
 **/secrets.toml
 
-# SQLite databases
-*.db
-
-# DCF model — never commit cached API responses
-dcf_model/data/cache/*.json
-dcf_model/data/cache/*.parquet
-
-# Monte Carlo dashboard cache
-mc_dashboard/data/cache/*.json
-
-# Study dashboard — never commit OAuth secrets
-study_dashboard/credentials.json
-study_dashboard/token.json
-
-# Nifty seasonality dashboard — cached yfinance pull, regenerated on first run
-nifty_dow_analysis/data/*.csv
-nifty_dow_analysis/streamlit_run.log
-
 # OS
 .DS_Store
 Thumbs.db
